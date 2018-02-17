@@ -9,6 +9,9 @@ const socketIO = require('socket.io');
 /**
  * Constants and other constant variables defined in scope.
  */
+const {
+  generateMessage
+} = require('./utils/message')
 const publicPath = path.join(__dirname, '../public');
 const PORT = process.env.PORT || 8000;
 
@@ -22,40 +25,26 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
 
   // Welcomes new user.
-  socket.emit('newMessage', {
-    from: 'Admin',
-    text: 'Welcome to the chat app'
-  });
+  socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
 
   // Warns everyone a new user joined.
-  socket.broadcast.emit('newMessage', {
-    from: 'Admin',
-    text: 'New user joined.',
-    createdAt: new Date().getTime(),
-  });
+  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined.'));
 
   socket.on('createMessage', (message) => {
-      console.log('Message received: ', message);
-      // emits a message to all connections.
-      io.emit('newMessage', {
-        from: message.from,
-        text: message.text,
-        createdAt: new Date().getTime()
-      })
-    });
-  //   socket.broadcast.emit('newMessage', {
-  //     from: message.from,
-  //     text: message.text,
-  //     createdAt: new Date().getTime()
-  // });
+    console.log('Message received: ', message);
+    // emits a message to all connections.
+    io.emit('newMessage', generateMessage(message.from, message.text));
+    //   socket.broadcast.emit('newMessage', {
+    //     from: message.from,
+    //     text: message.text,
+    //     createdAt: new Date().getTime()
+    // });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected.')
-    socket.broadcast.emit('newMessage', {
-      from: 'Admin',
-      text:'An user left',
-      createdAt: new Date().getTime()
+    socket.on('disconnect', () => {
+      console.log('User disconnected.')
+      socket.broadcast.emit('newMessage', generateMessage('Admin', 'An user left.'));
     });
+
   });
 });
 
