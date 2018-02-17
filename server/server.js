@@ -10,7 +10,7 @@ const socketIO = require('socket.io');
  * Constants and other constant variables defined in scope.
  */
 const publicPath = path.join(__dirname, '../public');
-let PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8000;
 
 let app = express();
 // Instead of using express's built-in http server. This allows to use socket.io
