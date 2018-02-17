@@ -10,7 +10,7 @@ const socketIO = require('socket.io');
  * Constants and other constant variables defined in scope.
  */
 const publicPath = path.join(__dirname, '../public');
-const PORT = process.env.PORT || 3000;
+let PORT = process.env.PORT || 8000;
 
 let app = express();
 // Instead of using express's built-in http server. This allows to use socket.io
@@ -22,14 +22,14 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New user connected.');
 
-  socket.emit('newMessage', {
-    from: 'someone',
-    text: 'some random text sent',
-    createdAt: 123
-  });
-
   socket.on('createMessage', (message) => {
     console.log('Message received: ', message);
+    // emits a message to all connections.
+    io.emit('newMessage', {
+      from: message.from,
+      text: message.text,
+      createdAt: new Date().getTime()
+    })
   });
 
   socket.on('disconnect', () => {
