@@ -20,23 +20,45 @@ app.use(express.static(publicPath));
 
 // Listens to new connection when it comes in.
 io.on('connection', (socket) => {
-  console.log('New user connected.');
+
+  // Welcomes new user.
+  socket.emit('newMessage', {
+    from: 'Admin',
+    text: 'Welcome to the chat app'
+  });
+
+  // Warns everyone a new user joined.
+  socket.broadcast.emit('newMessage', {
+    from: 'Admin',
+    text: 'New user joined.',
+    createdAt: new Date().getTime(),
+  });
 
   socket.on('createMessage', (message) => {
-    console.log('Message received: ', message);
-    // emits a message to all connections.
-    io.emit('newMessage', {
-      from: message.from,
-      text: message.text,
-      createdAt: new Date().getTime()
-    })
-  });
+      console.log('Message received: ', message);
+      // emits a message to all connections.
+      io.emit('newMessage', {
+        from: message.from,
+        text: message.text,
+        createdAt: new Date().getTime()
+      })
+    });
+  //   socket.broadcast.emit('newMessage', {
+  //     from: message.from,
+  //     text: message.text,
+  //     createdAt: new Date().getTime()
+  // });
 
   socket.on('disconnect', () => {
     console.log('User disconnected.')
+    socket.broadcast.emit('newMessage', {
+      from: 'Admin',
+      text:'An user left',
+      createdAt: new Date().getTime()
+    });
   });
 });
 
 server.listen(PORT, () => {
   console.log(`Server started at port ${PORT}`);
-})
+});
