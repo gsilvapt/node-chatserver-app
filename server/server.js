@@ -10,8 +10,10 @@ const socketIO = require('socket.io');
  * Constants and other constant variables defined in scope.
  */
 const {
-  generateMessage
+  generateMessage,
+  generateLocationMessage
 } = require('./utils/message')
+
 const publicPath = path.join(__dirname, '../public');
 const PORT = process.env.PORT || 8000;
 
@@ -35,18 +37,18 @@ io.on('connection', (socket) => {
     // emits a message to all connections.
     io.emit('newMessage', generateMessage(message.from, message.text));
     callback('This is from the server.');
-    //   socket.broadcast.emit('newMessage', {
-    //     from: message.from,
-    //     text: message.text,
-    //     createdAt: new Date().getTime()
-    // });
-
-    socket.on('disconnect', () => {
-      console.log('User disconnected.')
-      socket.broadcast.emit('newMessage', generateMessage('Admin', 'An user left.'));
-    });
-
   });
+
+  socket.on('createLocationMessage', (coords) => {
+    io.emit('newLocationMessage', generateLocationMessage('Admin',
+      coords.latitude, coords.longitude));
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected.')
+    socket.broadcast.emit('newMessage', generateMessage('Admin', 'An user left.'));
+  });
+
 });
 
 server.listen(PORT, () => {
