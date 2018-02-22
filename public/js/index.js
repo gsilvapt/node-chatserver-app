@@ -1,4 +1,25 @@
 let socket = io();
+
+/**
+ * Method to help scrolling to the bottom when new messages come it.
+ */
+function scrollToBottom() {
+  // Selectors
+  let messages = jQuery('#messages');
+  let newMessageHeight = messages.children('li:last-child');
+  // Heights
+  let clientHeight = messages.prop('clientHeight');
+  let scrollTop = messages.prop('scrollTop');
+  let scrollHeight = messages.prop('scrollHeight');
+  let newMessage = newMessageHeight.innerHeigh();
+  let lastMessageHeight = newMessage.prev().innerHeight();
+
+  if (clientHeight + scrollTop + lastMessageHeight >= scrollHeight) {
+    console.log('Should scroll down.');
+  } 
+}
+
+
 socket.on('connect', function () {
   console.log('Client connected to server.');
 
@@ -18,6 +39,7 @@ socket.on('newMessage', function (message) {
   });
 
   jQuery('#messages').append(html);
+  scrollToBottom();
 
 });
 
@@ -31,6 +53,7 @@ socket.on('newLocationMessage', function (message) {
   });
 
   jQuery('#messages').append(html);
+  scrollToBottom();
 
 });
 
