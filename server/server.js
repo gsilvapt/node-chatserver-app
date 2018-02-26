@@ -14,6 +14,10 @@ const {
   generateLocationMessage
 } = require('./utils/message')
 
+const {
+  isRealString
+} = require('./utils/validation')
+
 const publicPath = path.join(__dirname, '../public');
 const PORT = process.env.PORT || 8000;
 
@@ -26,11 +30,20 @@ app.use(express.static(publicPath));
 // Listens to new connection when it comes in.
 io.on('connection', (socket) => {
 
-  // Welcomes new user.
-  socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
+  socket.on('join', (params, callback) => {
+    if (!isRealString(params.name) || !isRealString(params.room)) {
+      callback('Name and room name are required.')
+    }
+    socket.join(params.room);
 
-  // Warns everyone a new user joined.
-  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined.'));
+    // Welcomes new user.
+    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
+
+    // Warns everyone a new user joined.
+    socket.broadcast.to(params.room)
+      .emit('newMessage', generateMessage('Admin', `${params.name} has joined.`));
+    callback();
+  })
 
   socket.on('createMessage', (message, callback) => {
     console.log('Message received: ', message);
