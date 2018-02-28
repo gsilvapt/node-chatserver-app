@@ -19,7 +19,6 @@ function scrollToBottom() {
   } 
 }
 
-
 socket.on('connect', function () {
   let params = jQuery.deparam(window.location.search);
 
@@ -36,6 +35,14 @@ socket.on('connect', function () {
 socket.on('disconnect', function () {
   console.log('Client disconnected from server.');
 });
+
+socket.on('updateUserList', function (users) {
+  let ul = jQuery('<ul></ul');
+  users.forEach(function (user) {
+    ul.append(jQuery('<li></li>').text(user));
+  });
+  jQuery('#users').html(ol);
+})
 
 socket.on('newMessage', function (message) {
   let formattedTime = moment(message.createdAt).format('hh:mm a');

@@ -18,6 +18,10 @@ const {
   isRealString
 } = require('./utils/validation')
 
+const {
+  Users
+} = require('./utils/users')
+
 const publicPath = path.join(__dirname, '../public');
 const PORT = process.env.PORT || 8000;
 
@@ -25,6 +29,8 @@ let app = express();
 // Instead of using express's built-in http server. This allows to use socket.io
 let server = http.createServer(app);
 let io = socketIO(server); // this allows new connections to the server.
+let users = new Users();
+
 app.use(express.static(publicPath));
 
 // Listens to new connection when it comes in.
@@ -34,7 +40,12 @@ io.on('connection', (socket) => {
     if (!isRealString(params.name) || !isRealString(params.room)) {
       callback('Name and room name are required.')
     }
+
     socket.join(params.room);
+    users.removeUser(socket.id);
+    users.addUser(socket.id, params.name, params.room)
+
+    io.to(params.room).emit('updateUserList', Users.getUserList(params.room))
 
     // Welcomes new user.
     socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
@@ -58,8 +69,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected.')
-    socket.broadcast.emit('newMessage', generateMessage('Admin', 'An user left.'));
+    let user = users.removeUser(socket.id);
+    if (user) {
+      io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+      io.to().emit('newMessage', generateMessage('Admin', `${user.name} has left.`));
+    }
   });
 
 });
