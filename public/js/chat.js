@@ -6,7 +6,7 @@ let socket = io();
 function scrollToBottom() {
   // Selectors
   let messages = jQuery('#messages');
-  let newMessage= messages.children('li:last-child');
+  let newMessage = messages.children('li:last-child');
   // Heights
   let clientHeight = messages.prop('clientHeight');
   let scrollTop = messages.prop('scrollTop');
@@ -16,7 +16,7 @@ function scrollToBottom() {
 
   if (clientHeight + scrollTop + lastMessageHeight >= scrollHeight) {
     messages.scrollTop(scrollHeight);
-  } 
+  }
 }
 
 socket.on('connect', function () {
@@ -48,9 +48,9 @@ socket.on('newMessage', function (message) {
   let formattedTime = moment(message.createdAt).format('hh:mm a');
   let template = jQuery('#message-template').html();
   let html = Mustache.render(template, {
-    createdAt: formattedTime,
     from: message.from,
-    text: message.text
+    text: message.text,
+    createdAt: formattedTime
   });
 
   jQuery('#messages').append(html);
